@@ -1,6 +1,6 @@
 -- Step 3b (replacement for the PL/SQL block)
 -- This query GENERATES the 3 INSERT statements using the real TRADE.FEE column list.
--- Each new fee is a copy of the existing 705.05 fee on txn 1, with TYPE / PAYMENT_DATE / AMOUNT changed
+-- Each new fee is a copy of fee 4 (the 705.05 fee) on txn 1, with TYPE / PAYMENT_DATE / AMOUNT changed
 -- and the next FEE_NUMBER.
 --   row 1: 111.11  type 24  20230314  (same-day maturity  -> the fix)
 --   row 2: 222.22  type 24  20231231  (future-dated maturity)
@@ -24,7 +24,7 @@ c AS (
 )
 SELECT 'INSERT INTO TRADE.FEE (' || c.cols || ') SELECT '
        || REPLACE(REPLACE(REPLACE(c.vals, '#T#', p.t), '#D#', p.d), '#A#', p.a)
-       || ' FROM TRADE.FEE WHERE DEAL = 2001389343 AND TRANSACTION_ID = 1 AND AMOUNT = 705.05 AND ROWNUM = 1;' AS STMT
+       || ' FROM TRADE.FEE WHERE DEAL = 2001389343 AND TRANSACTION_ID = 1 AND FEE_NUMBER = 4;' AS STMT
 FROM p, c
 ORDER BY p.seq;
 
