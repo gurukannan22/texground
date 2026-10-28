@@ -1,0 +1,8 @@
+-- Step 5c: the map has no rows for these 2021 contracts, so find their Oasys deals through the fees
+-- (fee DESCRIPTION = contract ref)
+SELECT DEAL, TRANSACTION_ID, FEE_NUMBER, TYPE, AMOUNT, PAYMENT_DATE, CURRENCY, DESCRIPTION
+FROM TRADE.FEE
+WHERE DESCRIPTION IN ('18607953', '18599054', '18596625', '18462785', '18462786',
+                      '18607923', '18495730', '18495733', '18599052', '18599053',
+                      '18607954', '18596613', '18599051')
+ORDER BY DEAL, TRANSACTION_ID, FEE_NUMBER;
