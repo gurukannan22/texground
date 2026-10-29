@@ -15,6 +15,28 @@ WHERE TYPE = 'SAME_DAY_FEE_MIG_C263_119169';
 -- 1b. Process date (expect 20230314)
 SELECT * FROM REFERENCE_DATA.PROCESS_DATE;
 
+-- 1c. Test deal selection: FX option (Proteus, London) deals whose LATEST transaction
+--     has a MATURITY fee (type 24) due on the process date and an AMEND message
+--     (expect deal 2001371316, txn 5, message 386121612)
+SELECT m.OASYS_DEAL, m.OASYS_TRANSACTION_ID, m.TPE_DEAL, m.PRODUCT_CLASS,
+       f.FEE_NUMBER, f.TYPE, ROUND(f.AMOUNT,2) AS AMOUNT, f.PAYMENT_DATE,
+       t.MESSAGE_ID AS AMEND_MESSAGE_ID
+FROM TRADE.TPE_DEAL_TRANSACTION_MAP m
+JOIN TRADE.FEE f
+  ON f.DEAL = m.OASYS_DEAL
+ AND f.TRANSACTION_ID = m.OASYS_TRANSACTION_ID
+JOIN TRADE.TPE_MESSAGE t
+  ON t.CONTRACT_REF = TO_CHAR(m.TPE_DEAL)
+WHERE m.PRODUCT_CLASS = 33
+  AND m.TRADE_ENTRY_SYSTEM = 'PROTEUS'
+  AND f.TYPE = 24
+  AND f.PAYMENT_DATE = (SELECT MAX(CURRENT_PROCESS_DATE) FROM REFERENCE_DATA.PROCESS_DATE)
+  AND m.OASYS_TRANSACTION_ID = (SELECT MAX(x.TRANSACTION_ID) FROM TRADE.TRANSACTION_TABLE x
+                                WHERE x.DEAL = m.OASYS_DEAL)
+  AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'citimlEventType>Amend') > 0
+  AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'termDeposit') = 0
+  AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'CTLON') > 0;
+
 -- ---------------------------------------------------------------------
 -- STEP 2. BEFORE  (doc: "2. Before")
 -- ---------------------------------------------------------------------
