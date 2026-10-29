@@ -37,6 +37,19 @@ WHERE m.PRODUCT_CLASS = 33
   AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'termDeposit') = 0
   AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'CTLON') > 0;
 
+-- 1d. Message to reprocess: latest Proteus AMEND message for the trade on the deal's latest txn
+--     (expect MESSAGE_ID 386121612, CONTRACT_REF 18607953)
+SELECT t.MESSAGE_ID, t.CONTRACT_REF, t.STATUS, t.LAST_UPDATED_TIME_STAMP,
+       m.OASYS_DEAL, m.OASYS_TRANSACTION_ID
+FROM TRADE.TPE_MESSAGE t
+JOIN TRADE.TPE_DEAL_TRANSACTION_MAP m
+  ON t.CONTRACT_REF = TO_CHAR(m.TPE_DEAL)
+WHERE m.OASYS_DEAL = 2001371316
+  AND m.OASYS_TRANSACTION_ID = (SELECT MAX(x.TRANSACTION_ID) FROM TRADE.TRANSACTION_TABLE x
+                                WHERE x.DEAL = m.OASYS_DEAL)
+  AND DBMS_LOB.INSTR(t.XML_MESSAGE, 'citimlEventType>Amend') > 0
+ORDER BY t.MESSAGE_ID DESC;
+
 -- ---------------------------------------------------------------------
 -- STEP 2. BEFORE  (doc: "2. Before")
 -- ---------------------------------------------------------------------
