@@ -1,0 +1,20 @@
+-- Step 9: change the premium in amend message 386121612 so AmendEventHandler sees a change (-> new txn 6)
+-- Reversible: undo with REPLACE '>19567<' -> '>19566<'
+
+-- 9a. How many times does '>19566<' appear? (MUST be 1 before running 9b)
+SELECT REGEXP_COUNT(XML_MESSAGE, '>19566<') AS HITS,
+       DBMS_LOB.SUBSTR(XML_MESSAGE, 300, DBMS_LOB.INSTR(XML_MESSAGE, '>19566<') - 200) AS CONTEXT
+FROM TRADE.TPE_MESSAGE
+WHERE MESSAGE_ID = 386121612;
+
+-- 9b. Change premium 19566 -> 19567 (expect 1 row updated)
+UPDATE TRADE.TPE_MESSAGE
+SET XML_MESSAGE = REPLACE(XML_MESSAGE, '>19566<', '>19567<')
+WHERE MESSAGE_ID = 386121612;
+COMMIT;
+
+-- 9c. Verify (expect OLD_HITS = 0, NEW_HITS = 1)
+SELECT REGEXP_COUNT(XML_MESSAGE, '>19566<') AS OLD_HITS,
+       REGEXP_COUNT(XML_MESSAGE, '>19567<') AS NEW_HITS
+FROM TRADE.TPE_MESSAGE
+WHERE MESSAGE_ID = 386121612;
