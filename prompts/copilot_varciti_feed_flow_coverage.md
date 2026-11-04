@@ -1,7 +1,7 @@
 # Copilot Prompts: VARCITI-FEED (oasystovarcitifeed) Flow + tp-regression Coverage
 
 Use these in order in Copilot Chat (VS Code: prefix with `@workspace`; IntelliJ: open the repo and attach the key files).
-Replace placeholders before running:
+Context:
 - `oasystovarcitifeed (VARCITI-FEED)` – the batch job / feed name
 - `tp-javabatch-service` – the Spring Batch service repo
 - `tp-regression` – the Cucumber automation repo
