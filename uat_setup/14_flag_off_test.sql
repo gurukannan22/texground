@@ -17,7 +17,7 @@ SELECT 'INSERT INTO TRADE.FEE (' ||
                  WHEN 'AMOUNT'       THEN '333.33'
                  ELSE column_name
                END, ', ') WITHIN GROUP (ORDER BY column_id) ||
-       ' FROM TRADE.FEE WHERE DEAL = 2002739527 AND TRANSACTION_ID = 2 AND ROWNUM = 1;' AS STMT
+       ' FROM TRADE.FEE WHERE DEAL = 2002739527 AND TRANSACTION_ID = (SELECT MAX(TRANSACTION_ID) FROM TRADE.TRANSACTION_TABLE WHERE DEAL = 2002739527) AND ROWNUM = 1;' AS STMT
 FROM all_tab_columns WHERE owner = 'TRADE' AND table_name = 'FEE';
 
 -- STEP 2. Set flag OFF (expect 1 row updated)
